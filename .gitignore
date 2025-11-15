@@ -1,0 +1,30 @@
+# Dependencies
+node_modules/
+
+# Logs
+*.log
+npm-debug.log*
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+
+# Environment
+.env
+auth.json
+auth.json.base64
+auth.json.backup
+
+# Build
+dist/
+
+# Project specific
+.claude/
+do_prompt.md
+
+# Debug
+debug/
