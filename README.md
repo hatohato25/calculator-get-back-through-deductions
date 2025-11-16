@@ -2,6 +2,10 @@
 
 サラリーマン向けの所得税控除・還付金を簡単に計算できるWebアプリケーションです。
 
+### [DEMO](https://hatohato25.github.io/calculator-get-back-through-deductions/)
+
+<img width="450" alt="スクリーンショット 2025-11-16 21 27 56" src="https://github.com/user-attachments/assets/5e657451-38b7-4d10-b5f0-059e7d536b63" />
+
 ## 概要
 
 年末調整や確定申告で適用できる各種控除を入力すると、還付される税金の概算額を自動計算します。ブラウザ上で動作するため、個人情報は外部に送信されず、安心してご利用いただけます。
