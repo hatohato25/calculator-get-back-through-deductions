@@ -1,4 +1,4 @@
-import type { Component } from 'solid-js';
+import { type Component, createSignal } from 'solid-js';
 import { inputStore, saveInputNow, setSalary } from '../../../application/stores/inputStore';
 import { HelpTooltip } from '../common/HelpTooltip';
 import { Input } from '../common/Input';
@@ -7,11 +7,25 @@ import { Input } from '../common/Input';
  * 年収入力コンポーネント
  */
 export const SalaryInput: Component = () => {
+  // 編集中の値を保持（文字列として）
+  const [editingValue, setEditingValue] = createSignal<string | number>(inputStore.salary);
+
   const handleChange = (value: number | string) => {
+    // 編集中は文字列をそのまま保持（"000000"などの途中入力でもカーソル位置が維持される）
+    setEditingValue(value);
+  };
+
+  const handleBlur = () => {
+    // フォーカスアウト時に数値変換してstoreに保存
+    const value = editingValue();
     const numValue = typeof value === 'string' ? Number.parseFloat(value) : value;
+
+    // NaNチェック - 無効な入力は無視
     if (!Number.isNaN(numValue)) {
       setSalary(numValue);
     }
+
+    saveInputNow();
   };
 
   return (
@@ -20,9 +34,9 @@ export const SalaryInput: Component = () => {
         <Input
           label="年収（給与収入）"
           type="number"
-          value={inputStore.salary}
+          value={editingValue()}
           onChange={handleChange}
-          onBlur={saveInputNow}
+          onBlur={handleBlur}
           placeholder="5000000"
           min={1000000}
           max={99990000}

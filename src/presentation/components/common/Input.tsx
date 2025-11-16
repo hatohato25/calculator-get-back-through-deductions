@@ -42,8 +42,9 @@ export const Input: Component<InputProps> = (props) => {
 
   const handleInput = (e: Event) => {
     const target = e.target as HTMLInputElement;
-    const value = props.type === 'number' ? Number.parseFloat(target.value) : target.value;
-    props.onChange(value);
+    // 編集中は文字列をそのまま渡す（数値変換はonBlur時に各コンポーネント側で行う）
+    // これにより"000000"のような編集途中の入力でもカーソル位置がリセットされない
+    props.onChange(target.value);
   };
 
   return (

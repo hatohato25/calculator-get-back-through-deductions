@@ -1,4 +1,4 @@
-import { type Component, createMemo } from 'solid-js';
+import { type Component, createMemo, createSignal } from 'solid-js';
 import { inputStore, saveInputNow, setHousingLoan } from '../../../application/stores/inputStore';
 import type { HousingType } from '../../../domain/types';
 import { HelpTooltip } from '../common/HelpTooltip';
@@ -35,13 +35,35 @@ export const HousingLoanInput: Component = () => {
     return inputStore.housingLoan?.housingType ?? 'new-certified';
   });
 
+  // 編集中の値を保持（文字列として）
+  const [editingBalance, setEditingBalance] = createSignal<string | number>(
+    inputStore.housingLoan?.yearEndBalance ?? ''
+  );
+
   const handleBalanceChange = (value: number | string) => {
-    const numValue = typeof value === 'string' ? Number.parseFloat(value) : value;
-    if (Number.isNaN(numValue) || numValue === 0) {
+    // 編集中は文字列をそのまま保持（"000000"などの途中入力でもカーソル位置が維持される）
+    setEditingBalance(value);
+  };
+
+  const handleBalanceBlur = () => {
+    // フォーカスアウト時に数値変換してstoreに保存
+    const value = editingBalance();
+
+    // 空文字列・null・undefinedの明示的な処理
+    if (value === '' || value === null || value === undefined) {
       setHousingLoan(undefined, residenceYear(), housingType());
-    } else {
+      saveInputNow();
+      return;
+    }
+
+    const numValue = typeof value === 'string' ? Number.parseFloat(value) : value;
+
+    // NaNチェック - 無効な入力は無視
+    if (!Number.isNaN(numValue)) {
       setHousingLoan(numValue, residenceYear(), housingType());
     }
+
+    saveInputNow();
   };
 
   const handleYearChange = (value: string | number) => {
@@ -80,9 +102,9 @@ export const HousingLoanInput: Component = () => {
           <Input
             label="年末時点のローン残高"
             type="number"
-            value={inputStore.housingLoan?.yearEndBalance ?? ''}
+            value={editingBalance()}
             onChange={handleBalanceChange}
-            onBlur={saveInputNow}
+            onBlur={handleBalanceBlur}
             placeholder="30000000"
             min={0}
             max={100000000}

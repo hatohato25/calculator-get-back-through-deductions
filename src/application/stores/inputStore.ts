@@ -99,11 +99,11 @@ export function setMedicalExpense(totalExpense: number | undefined) {
 /**
  * 寄附金入力を更新
  */
-export function setDonation(furusato: number, other: number) {
-  if (furusato === 0 && other === 0) {
+export function setDonation(furusato: number | undefined, other: number | undefined) {
+  if ((furusato === undefined || furusato === 0) && (other === undefined || other === 0)) {
     setInputStore('donation', undefined);
   } else {
-    setInputStore('donation', { furusato, other });
+    setInputStore('donation', { furusato: furusato ?? 0, other: other ?? 0 });
   }
 }
 

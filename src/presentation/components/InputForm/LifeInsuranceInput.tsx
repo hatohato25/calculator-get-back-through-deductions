@@ -1,4 +1,4 @@
-import { type Component, createMemo } from 'solid-js';
+import { type Component, createMemo, createSignal } from 'solid-js';
 import { inputStore, saveInputNow, setLifeInsurance } from '../../../application/stores/inputStore';
 import { HelpTooltip } from '../common/HelpTooltip';
 import { Input } from '../common/Input';
@@ -26,34 +26,123 @@ export const LifeInsuranceInput: Component = () => {
     }
   };
 
+  // 編集中の値を保持（文字列として）
+  const [editingGeneral, setEditingGeneral] = createSignal<string | number>(
+    inputStore.lifeInsurance?.generalLifeInsurance ?? ''
+  );
+  const [editingPension, setEditingPension] = createSignal<string | number>(
+    inputStore.lifeInsurance?.personalPensionInsurance ?? ''
+  );
+  const [editingMedical, setEditingMedical] = createSignal<string | number>(
+    inputStore.lifeInsurance?.medicalCareInsurance ?? ''
+  );
+
   const handleGeneralChange = (value: number | string) => {
+    // 編集中は文字列をそのまま保持（"000000"などの途中入力でもカーソル位置が維持される）
+    setEditingGeneral(value);
+  };
+
+  const handleGeneralBlur = () => {
+    // フォーカスアウト時に数値変換してstoreに保存
+    const value = editingGeneral();
+
+    // 空文字列・null・undefinedの明示的な処理
+    if (value === '' || value === null || value === undefined) {
+      setLifeInsurance(
+        isNewSystem(),
+        undefined,
+        inputStore.lifeInsurance?.personalPensionInsurance,
+        inputStore.lifeInsurance?.medicalCareInsurance
+      );
+      saveInputNow();
+      return;
+    }
+
     const numValue = typeof value === 'string' ? Number.parseFloat(value) : value;
-    setLifeInsurance(
-      isNewSystem(),
-      numValue || undefined,
-      inputStore.lifeInsurance?.personalPensionInsurance,
-      inputStore.lifeInsurance?.medicalCareInsurance
-    );
+
+    // NaNチェック - 無効な入力は無視
+    if (!Number.isNaN(numValue)) {
+      setLifeInsurance(
+        isNewSystem(),
+        numValue,
+        inputStore.lifeInsurance?.personalPensionInsurance,
+        inputStore.lifeInsurance?.medicalCareInsurance
+      );
+    }
+
+    saveInputNow();
   };
 
   const handlePensionChange = (value: number | string) => {
+    // 編集中は文字列をそのまま保持（"000000"などの途中入力でもカーソル位置が維持される）
+    setEditingPension(value);
+  };
+
+  const handlePensionBlur = () => {
+    // フォーカスアウト時に数値変換してstoreに保存
+    const value = editingPension();
+
+    // 空文字列・null・undefinedの明示的な処理
+    if (value === '' || value === null || value === undefined) {
+      setLifeInsurance(
+        isNewSystem(),
+        inputStore.lifeInsurance?.generalLifeInsurance,
+        undefined,
+        inputStore.lifeInsurance?.medicalCareInsurance
+      );
+      saveInputNow();
+      return;
+    }
+
     const numValue = typeof value === 'string' ? Number.parseFloat(value) : value;
-    setLifeInsurance(
-      isNewSystem(),
-      inputStore.lifeInsurance?.generalLifeInsurance,
-      numValue || undefined,
-      inputStore.lifeInsurance?.medicalCareInsurance
-    );
+
+    // NaNチェック - 無効な入力は無視
+    if (!Number.isNaN(numValue)) {
+      setLifeInsurance(
+        isNewSystem(),
+        inputStore.lifeInsurance?.generalLifeInsurance,
+        numValue,
+        inputStore.lifeInsurance?.medicalCareInsurance
+      );
+    }
+
+    saveInputNow();
   };
 
   const handleMedicalChange = (value: number | string) => {
+    // 編集中は文字列をそのまま保持（"000000"などの途中入力でもカーソル位置が維持される）
+    setEditingMedical(value);
+  };
+
+  const handleMedicalBlur = () => {
+    // フォーカスアウト時に数値変換してstoreに保存
+    const value = editingMedical();
+
+    // 空文字列・null・undefinedの明示的な処理
+    if (value === '' || value === null || value === undefined) {
+      setLifeInsurance(
+        isNewSystem(),
+        inputStore.lifeInsurance?.generalLifeInsurance,
+        inputStore.lifeInsurance?.personalPensionInsurance,
+        undefined
+      );
+      saveInputNow();
+      return;
+    }
+
     const numValue = typeof value === 'string' ? Number.parseFloat(value) : value;
-    setLifeInsurance(
-      isNewSystem(),
-      inputStore.lifeInsurance?.generalLifeInsurance,
-      inputStore.lifeInsurance?.personalPensionInsurance,
-      numValue || undefined
-    );
+
+    // NaNチェック - 無効な入力は無視
+    if (!Number.isNaN(numValue)) {
+      setLifeInsurance(
+        isNewSystem(),
+        inputStore.lifeInsurance?.generalLifeInsurance,
+        inputStore.lifeInsurance?.personalPensionInsurance,
+        numValue
+      );
+    }
+
+    saveInputNow();
   };
 
   return (
@@ -94,9 +183,9 @@ export const LifeInsuranceInput: Component = () => {
           <Input
             label="一般生命保険料"
             type="number"
-            value={inputStore.lifeInsurance?.generalLifeInsurance ?? ''}
+            value={editingGeneral()}
             onChange={handleGeneralChange}
-            onBlur={saveInputNow}
+            onBlur={handleGeneralBlur}
             placeholder="80000"
             min={0}
             step={1000}
@@ -117,9 +206,9 @@ export const LifeInsuranceInput: Component = () => {
           <Input
             label="個人年金保険料"
             type="number"
-            value={inputStore.lifeInsurance?.personalPensionInsurance ?? ''}
+            value={editingPension()}
             onChange={handlePensionChange}
-            onBlur={saveInputNow}
+            onBlur={handlePensionBlur}
             placeholder="80000"
             min={0}
             step={1000}
@@ -141,9 +230,9 @@ export const LifeInsuranceInput: Component = () => {
             <Input
               label="介護医療保険料"
               type="number"
-              value={inputStore.lifeInsurance?.medicalCareInsurance ?? ''}
+              value={editingMedical()}
               onChange={handleMedicalChange}
-              onBlur={saveInputNow}
+              onBlur={handleMedicalBlur}
               placeholder="80000"
               min={0}
               step={1000}

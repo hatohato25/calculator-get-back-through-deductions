@@ -1,4 +1,4 @@
-import type { Component } from 'solid-js';
+import { type Component, createSignal } from 'solid-js';
 import { inputStore, saveInputNow, setDonation } from '../../../application/stores/inputStore';
 import { HelpTooltip } from '../common/HelpTooltip';
 import { Input } from '../common/Input';
@@ -7,18 +7,64 @@ import { Input } from '../common/Input';
  * 寄附金控除入力コンポーネント
  */
 export const DonationInput: Component = () => {
+  // 編集中の値を保持（文字列として）
+  const [editingFurusato, setEditingFurusato] = createSignal<string | number>(
+    inputStore.donation?.furusato ?? ''
+  );
+  const [editingOther, setEditingOther] = createSignal<string | number>(
+    inputStore.donation?.other ?? ''
+  );
+
   const handleFurusatoChange = (value: number | string) => {
+    // 編集中は文字列をそのまま保持（"000000"などの途中入力でもカーソル位置が維持される）
+    setEditingFurusato(value);
+  };
+
+  const handleFurusatoBlur = () => {
+    // フォーカスアウト時に数値変換してstoreに保存
+    const value = editingFurusato();
+
+    // 空文字列・null・undefinedの明示的な処理
+    if (value === '' || value === null || value === undefined) {
+      setDonation(undefined, inputStore.donation?.other);
+      saveInputNow();
+      return;
+    }
+
     const numValue = typeof value === 'string' ? Number.parseFloat(value) : value;
-    const furusato = Number.isNaN(numValue) ? 0 : numValue;
-    const other = inputStore.donation?.other ?? 0;
-    setDonation(furusato, other);
+
+    // NaNチェック - 無効な入力は無視
+    if (!Number.isNaN(numValue)) {
+      setDonation(numValue, inputStore.donation?.other);
+    }
+
+    saveInputNow();
   };
 
   const handleOtherChange = (value: number | string) => {
+    // 編集中は文字列をそのまま保持（"000000"などの途中入力でもカーソル位置が維持される）
+    setEditingOther(value);
+  };
+
+  const handleOtherBlur = () => {
+    // フォーカスアウト時に数値変換してstoreに保存
+    const value = editingOther();
+
+    // 空文字列・null・undefinedの明示的な処理
+    if (value === '' || value === null || value === undefined) {
+      setDonation(inputStore.donation?.furusato, undefined);
+      saveInputNow();
+      return;
+    }
+
     const numValue = typeof value === 'string' ? Number.parseFloat(value) : value;
-    const other = Number.isNaN(numValue) ? 0 : numValue;
-    const furusato = inputStore.donation?.furusato ?? 0;
-    setDonation(furusato, other);
+
+    // NaNチェック - 無効な入力は無視
+    if (!Number.isNaN(numValue)) {
+      setDonation(inputStore.donation?.furusato, numValue);
+    }
+
+    saveInputNow();
   };
 
   return (
@@ -29,9 +75,9 @@ export const DonationInput: Component = () => {
           <Input
             label="ふるさと納税"
             type="number"
-            value={inputStore.donation?.furusato ?? ''}
+            value={editingFurusato()}
             onChange={handleFurusatoChange}
-            onBlur={saveInputNow}
+            onBlur={handleFurusatoBlur}
             placeholder="50000"
             min={0}
             step={1000}
@@ -48,9 +94,9 @@ export const DonationInput: Component = () => {
           <Input
             label="その他寄附金"
             type="number"
-            value={inputStore.donation?.other ?? ''}
+            value={editingOther()}
             onChange={handleOtherChange}
-            onBlur={saveInputNow}
+            onBlur={handleOtherBlur}
             placeholder="10000"
             min={0}
             step={1000}
