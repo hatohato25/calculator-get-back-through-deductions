@@ -62,16 +62,14 @@ export function setLifeInsurance(
   personalPensionInsurance?: number,
   medicalCareInsurance?: number
 ) {
-  if (!generalLifeInsurance && !personalPensionInsurance && !medicalCareInsurance) {
-    setInputStore('lifeInsurance', undefined);
-  } else {
-    setInputStore('lifeInsurance', {
-      isNewSystem,
-      generalLifeInsurance,
-      personalPensionInsurance,
-      medicalCareInsurance,
-    });
-  }
+  // 保険料がすべて未入力でも、制度選択は保持する
+  // ユーザーが制度を選択してから保険料を入力する場合に対応
+  setInputStore('lifeInsurance', {
+    isNewSystem,
+    generalLifeInsurance,
+    personalPensionInsurance,
+    medicalCareInsurance,
+  });
 }
 
 /**

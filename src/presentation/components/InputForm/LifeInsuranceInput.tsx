@@ -14,16 +14,15 @@ export const LifeInsuranceInput: Component = () => {
   });
 
   const handleSystemChange = (newSystem: boolean) => {
-    // 新しい制度値で保険料を更新
-    const general = inputStore.lifeInsurance?.generalLifeInsurance ?? 0;
-    const pension = inputStore.lifeInsurance?.personalPensionInsurance ?? 0;
-    const medical = inputStore.lifeInsurance?.medicalCareInsurance ?? 0;
-
-    if (general === 0 && pension === 0 && medical === 0) {
-      setLifeInsurance(newSystem, undefined, undefined, undefined);
-    } else {
-      setLifeInsurance(newSystem, general || undefined, pension || undefined, medical || undefined);
-    }
+    // 制度切り替え時は、現在の保険料入力値を保持したまま制度だけ変更
+    setLifeInsurance(
+      newSystem,
+      inputStore.lifeInsurance?.generalLifeInsurance,
+      inputStore.lifeInsurance?.personalPensionInsurance,
+      inputStore.lifeInsurance?.medicalCareInsurance
+    );
+    // 制度切り替えは明示的なユーザー操作なので即座に保存
+    saveInputNow();
   };
 
   // 編集中の値を保持（文字列として）
