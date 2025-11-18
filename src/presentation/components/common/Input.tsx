@@ -9,6 +9,8 @@ type InputProps = {
   value: number | string | undefined;
   /** 変更ハンドラ */
   onChange: (value: number | string) => void;
+  /** フォーカスハンドラ */
+  onFocus?: () => void;
   /** フォーカスアウトハンドラ */
   onBlur?: () => void;
   /** プレースホルダー */
@@ -62,6 +64,7 @@ export const Input: Component<InputProps> = (props) => {
           type={props.type || 'text'}
           value={props.value ?? ''}
           onInput={handleInput}
+          onFocus={() => props.onFocus?.()}
           onBlur={() => props.onBlur?.()}
           placeholder={props.placeholder}
           min={props.min}

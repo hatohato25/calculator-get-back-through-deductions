@@ -14,7 +14,6 @@ export class InputDataStorage {
     try {
       const json = JSON.stringify(input);
       localStorage.setItem(this.STORAGE_KEY, json);
-      console.log('InputDataStorage.save() success:', this.STORAGE_KEY);
     } catch (error) {
       console.error('Failed to save input data to localStorage:', error);
       // localStorageの保存失敗は致命的エラーではないため、エラーをスローしない

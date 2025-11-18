@@ -1,4 +1,4 @@
-import { type Component, createSignal } from 'solid-js';
+import { type Component, createMemo, createSignal } from 'solid-js';
 import { inputStore, saveInputNow, setDonation } from '../../../application/stores/inputStore';
 import { HelpTooltip } from '../common/HelpTooltip';
 import { Input } from '../common/Input';
@@ -7,13 +7,34 @@ import { Input } from '../common/Input';
  * 寄附金控除入力コンポーネント
  */
 export const DonationInput: Component = () => {
+  // 編集中かどうかを追跡
+  const [isFurusatoEditing, setIsFurusatoEditing] = createSignal(false);
+  const [isOtherEditing, setIsOtherEditing] = createSignal(false);
   // 編集中の値を保持（文字列として）
-  const [editingFurusato, setEditingFurusato] = createSignal<string | number>(
-    inputStore.donation?.furusato ?? ''
-  );
-  const [editingOther, setEditingOther] = createSignal<string | number>(
-    inputStore.donation?.other ?? ''
-  );
+  const [editingFurusato, setEditingFurusato] = createSignal<string | number>('');
+  const [editingOther, setEditingOther] = createSignal<string | number>('');
+
+  // 表示値: 編集中は編集値、そうでなければstoreの値
+  // localStorageから復元された値もここで自動的に反映される
+  const displayFurusato = createMemo(() => {
+    if (isFurusatoEditing()) {
+      return editingFurusato();
+    }
+    return inputStore.donation?.furusato ?? '';
+  });
+
+  const displayOther = createMemo(() => {
+    if (isOtherEditing()) {
+      return editingOther();
+    }
+    return inputStore.donation?.other ?? '';
+  });
+
+  const handleFurusatoFocus = () => {
+    // フォーカス時に現在のstoreの値を編集値にコピー
+    setEditingFurusato(inputStore.donation?.furusato ?? '');
+    setIsFurusatoEditing(true);
+  };
 
   const handleFurusatoChange = (value: number | string) => {
     // 編集中は文字列をそのまま保持（"000000"などの途中入力でもカーソル位置が維持される）
@@ -21,6 +42,8 @@ export const DonationInput: Component = () => {
   };
 
   const handleFurusatoBlur = () => {
+    setIsFurusatoEditing(false);
+
     // フォーカスアウト時に数値変換してstoreに保存
     const value = editingFurusato();
 
@@ -41,12 +64,20 @@ export const DonationInput: Component = () => {
     saveInputNow();
   };
 
+  const handleOtherFocus = () => {
+    // フォーカス時に現在のstoreの値を編集値にコピー
+    setEditingOther(inputStore.donation?.other ?? '');
+    setIsOtherEditing(true);
+  };
+
   const handleOtherChange = (value: number | string) => {
     // 編集中は文字列をそのまま保持（"000000"などの途中入力でもカーソル位置が維持される）
     setEditingOther(value);
   };
 
   const handleOtherBlur = () => {
+    setIsOtherEditing(false);
+
     // フォーカスアウト時に数値変換してstoreに保存
     const value = editingOther();
 
@@ -75,8 +106,9 @@ export const DonationInput: Component = () => {
           <Input
             label="ふるさと納税"
             type="number"
-            value={editingFurusato()}
+            value={displayFurusato()}
             onChange={handleFurusatoChange}
+            onFocus={handleFurusatoFocus}
             onBlur={handleFurusatoBlur}
             placeholder="50000"
             min={0}
@@ -94,8 +126,9 @@ export const DonationInput: Component = () => {
           <Input
             label="その他寄附金"
             type="number"
-            value={editingOther()}
+            value={displayOther()}
             onChange={handleOtherChange}
+            onFocus={handleOtherFocus}
             onBlur={handleOtherBlur}
             placeholder="10000"
             min={0}

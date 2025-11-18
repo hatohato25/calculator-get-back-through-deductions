@@ -1,4 +1,4 @@
-import { type Component, createSignal } from 'solid-js';
+import { type Component, createMemo, createSignal } from 'solid-js';
 import {
   inputStore,
   saveInputNow,
@@ -11,10 +11,25 @@ import { Input } from '../common/Input';
  * 特定支出控除入力コンポーネント
  */
 export const SpecialExpenseInput: Component = () => {
+  // 編集中かどうかを追跡
+  const [isEditing, setIsEditing] = createSignal(false);
   // 編集中の値を保持（文字列として）
-  const [editingValue, setEditingValue] = createSignal<string | number>(
-    inputStore.specialExpense?.commuteExpense ?? ''
-  );
+  const [editingValue, setEditingValue] = createSignal<string | number>('');
+
+  // 表示値: 編集中は編集値、そうでなければstoreの値
+  // localStorageから復元された値もここで自動的に反映される
+  const displayValue = createMemo(() => {
+    if (isEditing()) {
+      return editingValue();
+    }
+    return inputStore.specialExpense?.commuteExpense ?? '';
+  });
+
+  const handleFocus = () => {
+    // フォーカス時に現在のstoreの値を編集値にコピー
+    setEditingValue(inputStore.specialExpense?.commuteExpense ?? '');
+    setIsEditing(true);
+  };
 
   const handleChange = (value: number | string) => {
     // 編集中は文字列をそのまま保持（"000000"などの途中入力でもカーソル位置が維持される）
@@ -22,6 +37,8 @@ export const SpecialExpenseInput: Component = () => {
   };
 
   const handleBlur = () => {
+    setIsEditing(false);
+
     // フォーカスアウト時に数値変換してstoreに保存
     const value = editingValue();
 
@@ -49,8 +66,9 @@ export const SpecialExpenseInput: Component = () => {
           <Input
             label="特定支出控除（通勤費）"
             type="number"
-            value={editingValue()}
+            value={displayValue()}
             onChange={handleChange}
+            onFocus={handleFocus}
             onBlur={handleBlur}
             placeholder="100000"
             min={0}

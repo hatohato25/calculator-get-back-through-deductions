@@ -18,10 +18,7 @@ export function useInputStorage() {
   onMount(() => {
     const savedData = storage.load();
     if (savedData) {
-      console.log('Loaded from localStorage:', savedData);
       setInputStore(savedData);
-    } else {
-      console.log('No saved data found in localStorage');
     }
   });
 
@@ -46,7 +43,6 @@ export function useInputStorage() {
         // 1000ms後に保存（ユーザーが入力後少し待てば確実に保存されるように）
         saveTimeout = window.setTimeout(() => {
           storage.save(currentInput);
-          console.log('Saved to localStorage:', currentInput);
         }, 1000);
       },
       { defer: true }
@@ -68,7 +64,6 @@ export function useInputStorage() {
 
     // 即座に保存
     storage.save(inputStore);
-    console.log('Saved immediately to localStorage:', inputStore);
   }
 
   /**

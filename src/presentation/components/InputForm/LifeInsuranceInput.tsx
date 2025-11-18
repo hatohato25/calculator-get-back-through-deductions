@@ -25,16 +25,43 @@ export const LifeInsuranceInput: Component = () => {
     saveInputNow();
   };
 
+  // 編集中かどうかを追跡
+  const [isGeneralEditing, setIsGeneralEditing] = createSignal(false);
+  const [isPensionEditing, setIsPensionEditing] = createSignal(false);
+  const [isMedicalEditing, setIsMedicalEditing] = createSignal(false);
   // 編集中の値を保持（文字列として）
-  const [editingGeneral, setEditingGeneral] = createSignal<string | number>(
-    inputStore.lifeInsurance?.generalLifeInsurance ?? ''
-  );
-  const [editingPension, setEditingPension] = createSignal<string | number>(
-    inputStore.lifeInsurance?.personalPensionInsurance ?? ''
-  );
-  const [editingMedical, setEditingMedical] = createSignal<string | number>(
-    inputStore.lifeInsurance?.medicalCareInsurance ?? ''
-  );
+  const [editingGeneral, setEditingGeneral] = createSignal<string | number>('');
+  const [editingPension, setEditingPension] = createSignal<string | number>('');
+  const [editingMedical, setEditingMedical] = createSignal<string | number>('');
+
+  // 表示値: 編集中は編集値、そうでなければstoreの値
+  // localStorageから復元された値もここで自動的に反映される
+  const displayGeneral = createMemo(() => {
+    if (isGeneralEditing()) {
+      return editingGeneral();
+    }
+    return inputStore.lifeInsurance?.generalLifeInsurance ?? '';
+  });
+
+  const displayPension = createMemo(() => {
+    if (isPensionEditing()) {
+      return editingPension();
+    }
+    return inputStore.lifeInsurance?.personalPensionInsurance ?? '';
+  });
+
+  const displayMedical = createMemo(() => {
+    if (isMedicalEditing()) {
+      return editingMedical();
+    }
+    return inputStore.lifeInsurance?.medicalCareInsurance ?? '';
+  });
+
+  const handleGeneralFocus = () => {
+    // フォーカス時に現在のstoreの値を編集値にコピー
+    setEditingGeneral(inputStore.lifeInsurance?.generalLifeInsurance ?? '');
+    setIsGeneralEditing(true);
+  };
 
   const handleGeneralChange = (value: number | string) => {
     // 編集中は文字列をそのまま保持（"000000"などの途中入力でもカーソル位置が維持される）
@@ -42,6 +69,8 @@ export const LifeInsuranceInput: Component = () => {
   };
 
   const handleGeneralBlur = () => {
+    setIsGeneralEditing(false);
+
     // フォーカスアウト時に数値変換してstoreに保存
     const value = editingGeneral();
 
@@ -72,12 +101,20 @@ export const LifeInsuranceInput: Component = () => {
     saveInputNow();
   };
 
+  const handlePensionFocus = () => {
+    // フォーカス時に現在のstoreの値を編集値にコピー
+    setEditingPension(inputStore.lifeInsurance?.personalPensionInsurance ?? '');
+    setIsPensionEditing(true);
+  };
+
   const handlePensionChange = (value: number | string) => {
     // 編集中は文字列をそのまま保持（"000000"などの途中入力でもカーソル位置が維持される）
     setEditingPension(value);
   };
 
   const handlePensionBlur = () => {
+    setIsPensionEditing(false);
+
     // フォーカスアウト時に数値変換してstoreに保存
     const value = editingPension();
 
@@ -108,12 +145,20 @@ export const LifeInsuranceInput: Component = () => {
     saveInputNow();
   };
 
+  const handleMedicalFocus = () => {
+    // フォーカス時に現在のstoreの値を編集値にコピー
+    setEditingMedical(inputStore.lifeInsurance?.medicalCareInsurance ?? '');
+    setIsMedicalEditing(true);
+  };
+
   const handleMedicalChange = (value: number | string) => {
     // 編集中は文字列をそのまま保持（"000000"などの途中入力でもカーソル位置が維持される）
     setEditingMedical(value);
   };
 
   const handleMedicalBlur = () => {
+    setIsMedicalEditing(false);
+
     // フォーカスアウト時に数値変換してstoreに保存
     const value = editingMedical();
 
@@ -182,8 +227,9 @@ export const LifeInsuranceInput: Component = () => {
           <Input
             label="一般生命保険料"
             type="number"
-            value={editingGeneral()}
+            value={displayGeneral()}
             onChange={handleGeneralChange}
+            onFocus={handleGeneralFocus}
             onBlur={handleGeneralBlur}
             placeholder="80000"
             min={0}
@@ -205,8 +251,9 @@ export const LifeInsuranceInput: Component = () => {
           <Input
             label="個人年金保険料"
             type="number"
-            value={editingPension()}
+            value={displayPension()}
             onChange={handlePensionChange}
+            onFocus={handlePensionFocus}
             onBlur={handlePensionBlur}
             placeholder="80000"
             min={0}
@@ -229,8 +276,9 @@ export const LifeInsuranceInput: Component = () => {
             <Input
               label="介護医療保険料"
               type="number"
-              value={editingMedical()}
+              value={displayMedical()}
               onChange={handleMedicalChange}
+              onFocus={handleMedicalFocus}
               onBlur={handleMedicalBlur}
               placeholder="80000"
               min={0}
