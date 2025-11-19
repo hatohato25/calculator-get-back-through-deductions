@@ -9,13 +9,13 @@ import { Select } from '../common/Select';
  * 住宅ローン控除入力コンポーネント
  */
 export const HousingLoanInput: Component = () => {
-  // 現在の年から10年前までの年リストを動的生成
+  // 現在の年から13年前までの年リストを動的生成
   const yearOptions = createMemo(() => {
     const currentYear = new Date().getFullYear();
     const years: Array<{ value: string; label: string }> = [];
 
-    // 現在の年から10年前まで（11年分）を降順で生成
-    for (let year = currentYear; year >= currentYear - 10; year--) {
+    // 現在の年から13年前まで（14年分）を降順で生成
+    for (let year = currentYear; year >= currentYear - 13; year--) {
       years.push({
         value: year.toString(),
         label: `${year}年`,
