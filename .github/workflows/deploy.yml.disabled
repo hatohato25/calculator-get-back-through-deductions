@@ -1,3 +1,7 @@
+# Vercel移行のため無効化（2025-12-12）
+# 緊急時に再度有効化する場合は、このファイルを deploy.yml にリネームしてください
+# ロールバック用として保持
+
 name: Deploy to GitHub Pages
 
 on:

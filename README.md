@@ -2,7 +2,7 @@
 
 サラリーマン向けの所得税控除・還付金を簡単に計算できるWebアプリケーションです。
 
-### [DEMO](https://hatohato25.github.io/calculator-get-back-through-deductions/)
+### [DEMO](https://calculator-get-back-through-deductions.vercel.app)
 
 <img width="450" alt="スクリーンショット 2025-11-16 21 27 56" src="https://github.com/user-attachments/assets/5e657451-38b7-4d10-b5f0-059e7d536b63" />
 
@@ -102,6 +102,22 @@ npm run build
 # テスト実行
 npm test
 ```
+
+### デプロイ
+
+このプロジェクトは[Vercel](https://vercel.com)で自動デプロイされています。
+
+- **本番環境**: mainブランチへのpush時に自動デプロイ
+- **プレビュー環境**: Pull Request作成時に自動的にプレビューURLが生成されます
+
+#### デプロイ設定
+
+- **フレームワーク**: Vite
+- **ビルドコマンド**: `npm run build`
+- **出力ディレクトリ**: `dist`
+- **Node.jsバージョン**: 20.x
+
+詳細な設定は `vercel.json` を参照してください。
 
 ## ライセンス
 

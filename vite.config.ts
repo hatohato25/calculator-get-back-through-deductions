@@ -3,8 +3,9 @@ import solid from 'vite-plugin-solid';
 
 // https://vite.dev/config/
 export default defineConfig({
-  // GitHub Pagesのサブパスに対応（本番環境のみ）
-  base: process.env.NODE_ENV === 'production' ? '/calculator-get-back-through-deductions/' : '/',
+  // Vercel環境ではルートパス、GitHub Pagesではサブパスを使用
+  base: process.env.VERCEL ? '/' :
+        process.env.NODE_ENV === 'production' ? '/calculator-get-back-through-deductions/' : '/',
   plugins: [solid()],
   build: {
     target: 'esnext',
